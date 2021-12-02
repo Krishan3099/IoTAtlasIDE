@@ -3,96 +3,111 @@ from tkinter import *
 from tkinter import ttk
 import csv
 
-services = []
-relationships = []
+LARGE_FONT = ("Verdana", 12)
+
+
+servicesInfo = []
+relationshipInfo = []
 alive = []
 
-class Recipes(Frame):
+
+class Recipe(Frame):
     def __init__(self, parent, controller):
+        print("Recipe")
         from startpage import StartPage
         Frame.__init__(self, parent)
-        with open('ApplicationServices.csv', 'r') as file:
-            r = csv.reader(file)
-            self.rows = [line for line in r]
+
+        with open('service.csv', 'r') as file:
+            reader = csv.reader(file)
+            self.rows = [row for row in reader]
         with open('relationship.csv', 'r') as file:
-            rr = csv.reader(file)
-            rr_rows = [line for line in rr]
-            rr_rows = rr_rows[1:]
+            reader_array = csv.reader(file)
+            rowsArray = [row for row in reader_array]
+            rowsArray = rowsArray[1:]
+        servicesTree = ttk.Treeview(self, height=5, show="headings", columns=("Services"))
+        servicesTree.column("Services", width=220, anchor='center')
+        servicesTree.heading("Services", text="Services")
+        servicesTree.place(x=0, y=0)
+        bar1 = ttk.Scrollbar(servicesTree, orient='vertical',command=servicesTree.yview)
+        bar1.place(relx=0.91, rely=0.02, relwidth=0.08, relheight=0.95)
+        servicesTree.configure(yscrollcommand=bar1.set)
 
-        viewWindow = ttk.Treeview(self, height=6, show="attributes", columns="Services listed")
-        viewWindow.column("Services provided", width=300, anchor='center')
-        viewWindow.heading("Services provided", text="Services provided")
-        viewWindow.place(x=0, y=0)
-
-        viewWindow2 = ttk.Treeview(self, height=6, show="attributes", columns="Relationships listed")
-        viewWindow2.column("Relationships provided", width=300, anchor='center')
-        viewWindow2.heading("Relationships provided", text="Relationships provided")
-        viewWindow2.place(x=255, y=0)
-
+        relationshipTree = ttk.Treeview(self, height=5, show="headings", columns=("Relationships"))
+        relationshipTree.column("Relationships", width=220, anchor='center')
+        relationshipTree.heading("Relationships", text="Relationships")
+        relationshipTree.place(x=250, y=0)
+        bar2 = ttk.Scrollbar(relationshipTree, orient='vertical',command=relationshipTree.yview)
+        bar2.place(relx=0.91, rely=0.02, relwidth=0.08, relheight=0.95)
         clist = ttk.Combobox(self)
-        id = [line[0] for line in self.rows]
+        id = [row[0] for row in self.rows]
         clist["values"] = ["default"] + id
         clist.current(0)
-        clist.place(x=550, y=12)
-        clist.bind("<<ComboboxSelected>>", lambda event: self.initialize_service(viewWindow, clist))
+        clist.place(x=600, y=15)
+        clist.bind("<<ComboboxSelected>>", lambda event: self.add_service(servicesTree, clist))
 
         clist1 = ttk.Combobox(self)
-        id = [line[0] for line in rr_rows]
+        id = [row[0] for row in rowsArray]
         clist1["values"] = ["default"] + id
         clist1.current(0)
-        clist1.place(x=550, y=55)
-        clist1.bind("<<ComboboxSelected>>", lambda event: self.initialize_relationship(viewWindow2, clist1))
+        clist1.place(x=600, y=60)
+        clist1.bind("<<ComboboxSelected>>", lambda event: self.add_relationship(relationshipTree, clist1))
 
-        btn1 = Button(self, text="okay", command=lambda : self.okayService(viewWindow, viewWindow2))
-        btn1.place(x=550, y=260)
-        btn2 = Button(self, text="Delete All", command=lambda: self.clear(viewWindow, viewWindow2))
-        btn2.place(x=550, y=290)
-        btn3 = Button(self, text="Back", command=lambda: controller.show_frame(StartPage))
-        btn3.place(x=550, y=320)
+        # buttons
+        btnFinalize = Button(self, text='okay',command=lambda: self.finalize_app(servicesTree, relationshipTree))
+        btnFinalize.place(x=600, y=270)
 
-    def initialize_service(self, ser, combinationBox):
-        global services
-        global alive
-        if combinationBox.get() != "default":
-            for line in self.rows:
-                if line[0] == combinationBox.get()
-                    if line[1] not in alive:
-                        alive += [line[1]]
-                    services += [combinationBox.get()]
-                    ser.insert('', len(services)-1, values=(services[len(services)-1]))
+        btnclear = Button(self, text='Delete all', command=lambda: self.clear_all(servicesTree, relationshipTree))
+        btnclear.place(x=600, y=300)
+
+        btnback = Button(self, text="Back", command=lambda: controller.show_frame(StartPage))
+        btnback.place(x=600, y=330)
+
+
+    def add_service(self, treeViewService, comb0):
+        global servicesInfo, alive
+        if comb0.get() != "default":
+            for row in self.rows:
+                if row[0] == comb0.get():
+                    if row[1] not in alive:
+                        alive += [row[1]]
+                    servicesInfo += [comb0.get()]
+                    treeViewService.insert('', len(servicesInfo) - 1, values=(servicesInfo[len(servicesInfo) - 1]))
                     break
-
-    def initialize_relationship(self, ser, combinationBox):
-        global relationships
-        if combinationBox.get() not in relationships and combinationBox.get() != "default":
-            relationships += [combinationBox.get()]
-            ser.insert('', len(relationships) - 1, values=(relationships[len(relationships) - 1]))
-
-    def clear(self, ser, rel):
-        global services
-        global relationships
-        for i in ser.get_children():
-            ser.delete(i)
-        for i in rel.get_children():
-            rel.delete(i)
-        services = []
-        relationships = []
+        # else:
+        #     tkinter.messagebox.showinfo('Error', 'Please select an appropriat thing!')
 
 
-    def okayService(self, ser, rel):
-        global services
-        global relationships
-        serviceText = ''
-        relationshipText = ''
-        for i in services:
-            serviceText += i + ','
-        for i in relationships:
-            relationshipText += i + ','
-        relationshipText = relationshipText[:-1]
-        file = open('okayService.txt', 'w')
-        file.write(serviceText)
-        file.write('\n')
-        file.write(relationshipText)
-        file.close()
-        self.clear(ser, rel)
+    def add_relationship(self, treeViewRelationship, comb1):
+        print("b")
+        global relationshipInfo
+        if comb1.get() not in relationshipInfo and comb1.get() != "default":
+            relationshipInfo += [comb1.get()]
+            treeViewRelationship.insert('', len(relationshipInfo) - 1, values=(relationshipInfo[len(relationshipInfo) - 1]))
+        # elif comb1.get() == "default":
+        #     tkinter.messagebox.showinfo('Error', 'Please select an appropriate thing!')
+        # else:
+        #     tkinter.messagebox.showinfo('Error', 'Can not add same thing!')
 
+    def clear_all(self, treeViewService, treeViewRelationship):
+        global servicesInfo, relationshipInfo
+        for thing in treeViewService.get_children():
+            treeViewService.delete(thing)
+        for thing in treeViewRelationship.get_children():
+            treeViewRelationship.delete(thing)
+        servicesInfo, relationshipInfo = [], []
+
+    def finalize_app(self, treeViewService, treeViewRelationship):
+        global servicesInfo, relationshipInfo
+        service, relationship = '', ''
+        for thing in servicesInfo:
+            service += thing + ','
+        service = service[:-1]
+        for thing in relationshipInfo:
+            relationship += thing +','
+        relationship = relationship[:-1]
+        f = open("recipe.txt", 'w')
+        f.write(service)
+        f.write('\n')
+        f.write(relationship)
+        f.close()
+        self.clear_all(treeViewService, treeViewRelationship)
