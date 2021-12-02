@@ -80,6 +80,146 @@ class User(threading.Thread):
         threading.Thread.__init__(self)
         self.queue = queue
 
+    def run(self):
+        global thing, ip_array, name, flag
+        global num
+
+        thing_array = {}
+        ip_array = {}
+        indicies = {}
+        '''
+        for i in range(len(thing)):
+            thing_array[thing2[i]] = i
+            ip_array[thing2[i]] = i
+        num = len(thing2)
+        '''
+
+        o = set()
+
+        tweet = [''] * thing
+        servicesArray = [[]]
+        relationshipArray = [[]]
+        count = 0
+        for j in range(thing - 1):
+            servicesArray += [[]]
+            relationshipArray += [[]]
+
+        print("tweet: ", tweet)
+        print("servicesArray: ", servicesArray)
+        print("relationshipArray", relationshipArray)
+
+        multicast_group = '232.1.1.1'
+        server_address = ('', 8080)
+
+        # Create a UDP socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind(server_address)
+
+        group = socket.inet_aton(multicast_group)
+        mreq = struct.pack('4sL', group, socket.INADDR_ANY)
+        sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+
+        while True:
+
+            sock.setblocking(0)
+
+            selectArray = select.select([sock], [], [], 40)
+            if selectArray[0]:
+                data, server = sock.recvfrom(4096)
+            else:
+                flag = 1
+                tk.messagebox.showinfo('Error', 'Application timed out')
+                break
+            vss = "\"Space ID\" : \"" + name + "\""
+            strng = data.decode("utf-8")
+            if vss not in strng:
+                continue
+            datadict = data.decode("utf-8").replace("\"waitingTime_Seconds\"", "waitingTime_Seconds")
+            datadict = datadict.replace("'", "_")
+            datadict = datadict.replace("\"", "'")
+            datadict = eval(datadict)
+
+            thing = datadict['Thing ID']
+            tweetType = datadict['Tweet Type']
+
+            if thing not in thing_array and count == thing:
+                continue
+
+            if datadict not in tweet:
+                if thing not in o and count < thing:
+                    o.add(thing)
+                    thing_array[thing] = count
+                    ip_array[thing] = count
+                    tweet[count] = datadict
+                    print(o)
+                    index = thing_array[thing]
+                    print("new thing: ", thing, index)
+                    print("first:" + str(tweet))
+                    count += 1
+                    print("count: ", count)
+                else:
+                    index = thing_array[thing]
+                    print("existed thing, index", thing, index)
+
+                print(thing, index, tweetType)
+
+                if tweetType == "Identity_Language":
+                    ip_array[thing] = datadict['IP']
+                    indicies[thing] = index
+                elif tweetType == 'Service':
+                    servicesArray[index].append(datadict['Name'])
+                    print("datadict['Name'] ", datadict['Name'])
+                    print("servicesArray ", servicesArray)
+                elif tweetType == 'Relationship':
+                    rs = [datadict['Name'], datadict['Type'], datadict['FS name'], datadict['SS name']]
+                    relationshipArray[index].append(rs)
+                    print(relationshipArray)
+            else:
+                print("pop: " + str(thing_array))
+                thing_array.pop(thing)
+                print("pop: " + str(thing_array))
+                self.queue.put(num)
+                if not thing_array:
+                    break
+
+        sock.close()
+        print("")
+        print("Reception done!\n")
+        print("o: ", o)
+        print("ip_array: ", ip_array)
+        print("indicies: ", indicies)
+        print("servicesArray: ", servicesArray)
+        print("relationshipArray", relationshipArray)
+
+        o = list(o)
+        file = open('thing.csv', 'w')
+        for thing_array in ip_array:
+            file.write(thing_array + ',' + ip_array[thing_array] + '\n')
+        file.close()
+
+        file = open('service.csv', 'w')
+        for i in range(len(servicesArray)):
+            for j in indicies:
+                if indicies[j] == i:
+                    thing = j
+                    break
+            for service_name in servicesArray[i]:
+                file.write(service_name + ',' + thing + '\n')
+        file.close()
+
+        file = open('relationship.csv', 'w')
+        file.write("Name,Type,Service1,Service2" + '\n')
+        for thing in relationshipArray:
+            if thing:
+                for r in thing:
+                    file.write(
+                        r[0] + ',' + r[1] + ',' + r[2] + ',' + r[3] + '\n')
+        file.close()
+
+
+        
+
 
 
 
