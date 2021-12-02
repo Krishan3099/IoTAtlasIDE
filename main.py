@@ -1,8 +1,8 @@
 import tkinter as tk
-from Initialization import Initialization
+from initialization import Initialization
 from startpage import StartPage
 from IOTThings import IOTThings
-from Recipe import RecipeS
+from Recipes import Recipe
 
 LARGE_FONT= ("Verdana", 14)
 
@@ -32,7 +32,7 @@ class Main(tk.Tk):
 
     #show new frame
     def show_frame(self, cont):
-        for F in (InitPage, StartPage):
+        for F in (Initialization, StartPage):
             frame = F(self.container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
