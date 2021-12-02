@@ -173,7 +173,7 @@ class User(threading.Thread):
                 print("pop: " + str(thing_array))
                 thing_array.pop(thing)
                 print("pop: " + str(thing_array))
-                self.queue.put(num)
+                self.queue.put(count)
                 if not thing_array:
                     break
 

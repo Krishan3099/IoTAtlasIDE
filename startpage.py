@@ -10,13 +10,13 @@ class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         print("StartPage")
         from IOTThings import IOTThings
-        from Recipe import Recipe
+        from Recipes import Recipe
         tk.Frame.__init__(self, parent)
         headingText = tk.Label(self, text="Start Page", font=HEADING_FONT)
         headingText.place(x = 315, y = 10)
 
         ThingsButton = tk.Button(self, text="Things",
-                            command=lambda: controller.show_frame(Things))
+                            command=lambda: controller.show_frame(IOTThings))
         ThingsButton.pack()
         ThingsButton.place(x=170, y=75, height=90,width=180)
         ThingsButton['font'] = NORMAL_FONT
