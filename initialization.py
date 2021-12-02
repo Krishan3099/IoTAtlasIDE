@@ -87,12 +87,6 @@ class User(threading.Thread):
         thing_array = {}
         ip_array = {}
         indicies = {}
-        '''
-        for i in range(len(thing)):
-            thing_array[thing2[i]] = i
-            ip_array[thing2[i]] = i
-        num = len(thing2)
-        '''
 
         o = set()
 
@@ -164,10 +158,7 @@ class User(threading.Thread):
 
                 print(thing, index, tweetType)
 
-                if tweetType == "Identity_Language":
-                    ip_array[thing] = datadict['IP']
-                    indicies[thing] = index
-                elif tweetType == 'Service':
+                if tweetType == 'Service':
                     servicesArray[index].append(datadict['Name'])
                     print("datadict['Name'] ", datadict['Name'])
                     print("servicesArray ", servicesArray)
@@ -175,6 +166,9 @@ class User(threading.Thread):
                     rs = [datadict['Name'], datadict['Type'], datadict['FS name'], datadict['SS name']]
                     relationshipArray[index].append(rs)
                     print(relationshipArray)
+                elif tweetType == "Identity_Language":
+                    ip_array[thing] = datadict['IP']
+                    indicies[thing] = index
             else:
                 print("pop: " + str(thing_array))
                 thing_array.pop(thing)
