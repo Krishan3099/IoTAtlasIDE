@@ -1,1 +1,5 @@
-Name,Type,1st Service,2nd Service
+Name,Type,Service1,Service2
+button_pushed,Report,Pushbutton,Pushbutton
+Raspberry Pi internal CPU temperature sensor,Built-In,None,None
+Red LED,Connected,None,None
+Green LED ,Connected,None,None
