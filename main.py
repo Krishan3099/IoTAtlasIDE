@@ -1,15 +1,14 @@
 import tkinter as tk
-from initialization import Initialization
+from initpage import InitPage
 from startpage import StartPage
-from IOTThings import IOTThings
+from Things import Things
 from Recipes import Recipe
 
-LARGE_FONT= ("Verdana", 14)
+LARGE_FONT= ("Verdana", 12)
 
 class Main(tk.Tk):
 
     def __init__(self, *args, **kwargs):
-        print("1")
         tk.Tk.__init__(self, *args, **kwargs)
         f=open('thing.csv','w')
         f.close()
@@ -26,13 +25,10 @@ class Main(tk.Tk):
 
         self.frames = {}
 
-        #start with StartPage
-        self.show_frame(StartPage)
-        #self.show_frame(InitPage)
+        self.show_frame(InitPage)
 
-    #show new frame
     def show_frame(self, cont):
-        for F in (Initialization, StartPage):
+        for F in (InitPage, StartPage, Things, Recipe):
             frame = F(self.container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
